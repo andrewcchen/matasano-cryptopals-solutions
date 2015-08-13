@@ -15,8 +15,11 @@ import System.Random
 
 encryptionOracle :: ByteVector -> ByteVector -> StdGen -> (ByteVector, StdGen)
 encryptionOracle key input rng = flip runState rng $ do
-    let secret =  strToVec "This is supposed to be harder?\n\
-                           \I guess this really is harder!\n"
+    let secret = base64Decode "\
+          \Um9sbGluJyBpbiBteSA1LjAKV2l0aCBteSByYWctdG9wIGRvd24gc28gbXkg\
+          \aGFpciBjYW4gYmxvdwpUaGUgZ2lybGllcyBvbiBzdGFuZGJ5IHdhdmluZyBq\
+          \dXN0IHRvIHNheSBoaQpEaWQgeW91IHN0b3A/IE5vLCBJIGp1c3QgZHJvdmUg\
+          \YnkK"
         byteCountRange = (5, 10)
     prefixByteCount <- state $ randomR byteCountRange
     prefixBytes <- liftM V.fromList $ state $ randomBytes prefixByteCount
@@ -47,7 +50,7 @@ decryptContent blackbox rng = flip runState rng $ do
             else go -- try again
 
 
-    let contentLength = 62
+    let contentLength = 138
         fixW2 x1 x2 f = fix f x1 x2
     fixW2 0 [] $ \go offset acc -> if offset >= contentLength
                                        then return acc
