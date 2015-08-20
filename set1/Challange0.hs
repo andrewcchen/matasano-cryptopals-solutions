@@ -1,9 +1,5 @@
-import AES
 import Base64
-import CharFreq
-import Common
 import Hex
-import Xor
 
 import Test.QuickCheck
 

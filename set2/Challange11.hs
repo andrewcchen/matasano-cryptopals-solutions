@@ -25,8 +25,9 @@ encryptionOracle mode input rng = flip runState rng $ do
 
 detectMode :: (ByteVector -> ByteVector) -> Mode
 detectMode blackbox = if topFreq >= 14 then ECB else CBC
-    where outputBlocks = chunksOf 16 $ blackbox $ V.replicate (16 * 16) 0
-          topFreq = last $ sort $ map length $ group $ sort outputBlocks
+    where
+    outputBlocks = chunksOf 16 $ blackbox $ V.replicate (16 * 16) 0
+    topFreq = last $ sort $ map length $ group $ sort outputBlocks
 
 testDetectMode :: IO Bool
 testDetectMode = do

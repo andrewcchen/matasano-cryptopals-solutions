@@ -21,7 +21,8 @@ xorWithSingleByte bytes byte = V.map (xor byte) bytes
 
 xorWithRepeatingBytes :: ByteVector -> ByteVector -> ByteVector
 xorWithRepeatingBytes a b = V.imap (\i x -> xor x $ b V.! (i `mod` shortLen)) a
-    where shortLen = V.length b
+    where
+    shortLen = V.length b
 
 xorWithSameLength :: ByteVector -> ByteVector -> ByteVector
 xorWithSameLength = V.zipWith xor
@@ -34,16 +35,18 @@ xorBytes a b
     | otherwise                    = xorWithRepeatingBytes a b
 
 breakSingleKeyXor :: ByteVector -> Word8
-breakSingleKeyXor bytes = fst $ head $ sortOn snd $ zip keyRange scores
-    where keyRange = [32..126] -- The printable characters
-          scores = map scoreCharFreq $ map (xorWithSingleByte bytes) keyRange
+breakSingleKeyXor bytes = head $ sortOn scoreKey keyRange
+    where
+    keyRange = [0..255]
+    scoreKey = scoreByCharFreq . xorWithSingleByte bytes
 
 guessKeySize :: ByteVector -> [Int]
-guessKeySize bytes = map fst $ sortOn snd $ zip keySizeRange dists
-    where keySizeRange = [2 .. min 40 $ V.length bytes]
-          dists = map (flip blockHammingDistance bytes) keySizeRange
+guessKeySize bytes = sortOn (flip blockHammingDistance bytes) keySizeRange
+    where
+    keySizeRange = [2 .. min 40 $ V.length bytes]
 
 breakRepeatingKeyXor :: Int -> ByteVector -> ByteVector
 breakRepeatingKeyXor keySize bytes = V.fromList $ keys
-    where blocks = map V.fromList $ transpose $ chunksOf keySize bytes
-          keys = map breakSingleKeyXor blocks
+    where
+    keys = map breakSingleKeyXor blocks
+    blocks = map V.fromList $ transpose $ chunksOf keySize bytes

@@ -12,18 +12,21 @@ import System.Random
 
 parse :: String -> M.Map String String
 parse str = M.fromList $ map listToTuple $ map (splitOn "=") $ splitOn "&" str
-    where listToTuple (x1:x2:[]) = (x1, x2)
+    where
+    listToTuple (x1:x2:[]) = (x1, x2)
 
 profileFor :: String -> String
 profileFor email = "email=" ++ strip email ++ "&uid=10&role=user"
-    where strip = filter (/= '&') . filter (/= '=')
+    where
+    strip = filter (/= '&') . filter (/= '=')
 
 work :: (String -> ByteVector) -> ByteVector
 work blackbox = V.slice 0 32 encProfile V.++ encAdminBlock
-    where padString = vecToStr . pkcs7Pad 16 . strToVec
-          adminText = replicate 10 ' ' ++ padString "admin"
-          encAdminBlock = V.slice 16 16 $ blackbox adminText
-          encProfile = blackbox "foo@gmail.com"
+    where
+    padString = vecToStr . pkcs7Pad 16 . strToVec
+    adminText = replicate 10 ' ' ++ padString "admin"
+    encAdminBlock = V.slice 16 16 $ blackbox adminText
+    encProfile = blackbox "foo@gmail.com"
 
 main = do
     putStrLn "=== Challange13 ==="

@@ -43,13 +43,15 @@ strToVec = V.map (fromIntegral . ord) . V.fromList
 
 chunksOf :: Int -> ByteVector -> [[Word8]]
 chunksOf size = go
-    where go bytes = case V.splitAt size bytes of
-              (a,b) | V.null a  -> []
-                    | otherwise -> V.toList a : go b
+    where
+    go bytes = case V.splitAt size bytes of
+        (a,b) | V.null a  -> []
+              | otherwise -> V.toList a : go b
 
 randomBytes :: Int -> StdGen -> ([Word8], StdGen)
 randomBytes count rng = go count rng []
-    where go c g acc
-              | c == 0 = (acc, g)
-              | otherwise = let (byte, newG) = random g
-                            in go (c - 1) newG (byte:acc)
+    where
+    go c g acc
+        | c == 0 = (acc, g)
+        | otherwise = let (byte, newG) = random g
+                      in go (c - 1) newG (byte:acc)

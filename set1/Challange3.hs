@@ -2,9 +2,6 @@ import Common
 import Hex
 import Xor
 
-import Data.Char
-import qualified Data.Vector.Generic as V
-
 main = do
     putStrLn "=== Challange3 ==="
     putStrLn $ vecToStr $ xorWithSingleByte enc $ breakSingleKeyXor enc
