@@ -4,12 +4,10 @@ import Common
 import Padding
 
 import Data.Char
+import Data.Function
 import Data.List
 import qualified Data.Vector.Generic as V
 import Data.Word
-import Control.Arrow
-import Control.Monad
-import Control.Monad.Fix
 import Control.Monad.Trans.State.Lazy
 import System.Random
 
@@ -22,7 +20,7 @@ encryptionOracle key input rng = flip runState rng $ do
           \YnkK"
         byteCountRange = (5, 10)
     prefixByteCount <- state $ randomR byteCountRange
-    prefixBytes <- liftM V.fromList $ state $ randomBytes prefixByteCount
+    prefixBytes <- fmap V.fromList $ state $ randomBytes prefixByteCount
     let toEncrypt = prefixBytes V.++ input V.++ secret
     return $ encryptECB key $ pkcs7Pad 16 $ toEncrypt
 
@@ -35,12 +33,12 @@ decryptContent :: (ByteVector -> StdGen -> (ByteVector, StdGen))
 decryptContent blackbox rng = flip runState rng $ do
     let sortByFreq = map head . sortOn length . group . sort
         mostFreqBlk = last . sortByFreq . chunksOf 16
-    magicStrRep <- liftM (V.replicate $ 42 * 16) $ state random
-    magicStrRepEnc <- liftM mostFreqBlk $ state $ blackbox magicStrRep
+    magicStrRep <- fmap (V.replicate $ 42 * 16) $ state random
+    magicStrRepEnc <- fmap mostFreqBlk $ state $ blackbox magicStrRep
 
     (magicStr, magicStrEnc) <- fix $ \go -> do
-        pad <- liftM (flip V.replicate 0) $ state $ randomR (0, 15)
-        str <- liftM V.fromList $ state $ randomBytes 16
+        pad <- fmap (flip V.replicate 0) $ state $ randomR (0, 15)
+        str <- fmap V.fromList $ state $ randomBytes 16
         enc <- state $ blackbox $ pad V.++ str V.++ V.take 16 magicStrRep
         if magicStrRepEnc `elem` chunksOf 16 enc
             then let blks = chunksOf 16 enc
@@ -56,7 +54,7 @@ decryptContent blackbox rng = flip runState rng $ do
                                        then return acc
                                        else do
         let encrypt content = do
-            pad <- liftM (flip V.replicate 0) $ state $ randomR (0, 15)
+            pad <- fmap (flip V.replicate 0) $ state $ randomR (0, 15)
             enc <- state $ blackbox $ pad V.++ magicStr V.++ content
             let blks = chunksOf 16 enc
             case magicStrEnc `elemIndex` blks of
@@ -70,15 +68,15 @@ decryptContent blackbox rng = flip runState rng $ do
             blockInit = take 15 $ drop blockStart $ padding ++ acc
 
         let posBlocks = map (V.fromList . append blockInit) [0..255]
-        posEncBlocks <- mapM (liftM head . encrypt) posBlocks
-        actEncBlock <- liftM (!! blockNum) (encrypt $ V.fromList padding)
+        posEncBlocks <- mapM (fmap head . encrypt) posBlocks
+        actEncBlock <- fmap (!! blockNum) (encrypt $ V.fromList padding)
         let Just byte = actEncBlock `elemIndex` posEncBlocks
             newAcc = acc `append` fromIntegral byte
         go (offset + 1) newAcc
 
 main = do
     putStrLn "=== Challange14 ==="
-    key <- liftM V.fromList $ getStdRandom $ randomBytes 16
+    key <- fmap V.fromList $ getStdRandom $ randomBytes 16
     let blackbox = encryptionOracle key
     putStrLn "Message: "
     decrypted <- getStdRandom $ decryptContent blackbox

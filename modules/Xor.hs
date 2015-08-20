@@ -40,10 +40,10 @@ breakSingleKeyXor bytes = head $ sortOn scoreKey keyRange
     keyRange = [0..255]
     scoreKey = scoreByCharFreq . xorWithSingleByte bytes
 
-guessKeySize :: ByteVector -> [Int]
-guessKeySize bytes = sortOn (flip blockHammingDistance bytes) keySizeRange
+guessKeySize :: ByteVector -> Int
+guessKeySize bytes = head $ sortOn (flip blockHammingDistance bytes) sizeRange
     where
-    keySizeRange = [2 .. min 40 $ V.length bytes]
+    sizeRange = [2 .. min 40 $ V.length bytes]
 
 breakRepeatingKeyXor :: Int -> ByteVector -> ByteVector
 breakRepeatingKeyXor keySize bytes = V.fromList $ keys

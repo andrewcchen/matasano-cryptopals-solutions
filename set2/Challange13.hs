@@ -7,7 +7,6 @@ import Data.List.Split
 import qualified Data.Map as M
 import Data.Maybe
 import qualified Data.Vector.Generic as V
-import Control.Monad
 import System.Random
 
 parse :: String -> M.Map String String
@@ -30,7 +29,7 @@ work blackbox = V.slice 0 32 encProfile V.++ encAdminBlock
 
 main = do
     putStrLn "=== Challange13 ==="
-    key <- liftM V.fromList $ getStdRandom $ randomBytes 16
+    key <- fmap V.fromList $ getStdRandom $ randomBytes 16
     let blackbox = encryptECB key . pkcs7Pad 16 . strToVec . profileFor
         decrypt = parse . vecToStr . fromJust . pkcs7Unpad . decryptECB key
         sucess = decrypt (work blackbox) M.! "role" == "admin"

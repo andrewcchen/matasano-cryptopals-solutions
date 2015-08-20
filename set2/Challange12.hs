@@ -7,7 +7,6 @@ import Data.Char
 import Data.List
 import qualified Data.Vector.Generic as V
 import Data.Word
-import Control.Monad
 import System.Random
 
 data Mode = ECB | CBC deriving (Eq, Show, Enum)
@@ -68,7 +67,7 @@ decryptContent blackbox = go 0 []
 
 main = do
     putStrLn "=== Challange12 ==="
-    key <- liftM V.fromList $ getStdRandom $ randomBytes 16
+    key <- fmap V.fromList $ getStdRandom $ randomBytes 16
     let blackbox = encryptionOracle key
     putStr "Mode: "
     putStrLn $ show $ detectMode blackbox

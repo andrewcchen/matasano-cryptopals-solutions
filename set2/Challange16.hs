@@ -3,11 +3,9 @@ import Common
 import Padding
 import Xor
 
-import Data.Char
 import Data.Function
 import Data.List
 import qualified Data.Vector.Generic as V
-import Control.Monad
 import Control.Monad.Trans.State
 import System.Random
 
@@ -26,8 +24,8 @@ check key iv input = ";admin=true;" `isInfixOf` vecToStr decrypted
 
 main = do
     putStrLn "=== Challange16 ==="
-    key <- liftM V.fromList $ getStdRandom $ randomBytes 16
-    iv <- liftM V.fromList $ getStdRandom $ randomBytes 16
+    key <- fmap V.fromList $ getStdRandom $ randomBytes 16
+    iv <- fmap V.fromList $ getStdRandom $ randomBytes 16
     let out = generate key iv $ V.replicate 16 0
         diff = (xorBytes `on` strToVec) ";comment2=%20lik" ";admin=true;com="
         toXor = V.replicate 32 0 V.++ diff V.++ V.replicate 32 0

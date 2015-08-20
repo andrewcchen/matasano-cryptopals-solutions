@@ -7,5 +7,9 @@ import System.IO
 
 main = do
     putStrLn "=== Challange10 ==="
-    enc <- fmap (base64Decode . filter (/= '\n')) $ hGetContents =<< openFile "10.txt" ReadMode
-    putStr $ vecToStr $ decryptCBC (strToVec "YELLOW SUBMARINE") (V.replicate 16 0) enc
+    handle <- openFile "10.txt" ReadMode
+    enc <- fmap (base64Decode . filter (/= '\n')) $ hGetContents handle
+    putStr $ vecToStr $ decryptCBC key iv enc
+    where
+    key = strToVec "YELLOW SUBMARINE"
+    iv = V.replicate 16 0

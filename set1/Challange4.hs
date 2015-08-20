@@ -8,6 +8,8 @@ import System.IO
 
 main = do
     putStrLn "=== Challange4 ==="
-    encs <- fmap (map hexDecode . lines) $ hGetContents =<< openFile "4.txt" ReadMode
+    handle <- openFile "4.txt" ReadMode
+    encs <- fmap (map hexDecode . lines) $ hGetContents handle
     putStrLn $ vecToStr $ head $ sortOn scoreByCharFreq $ map breakXor encs
-    where breakXor enc = xorWithSingleByte enc $ breakSingleKeyXor enc
+    where
+    breakXor enc = xorWithSingleByte enc $ breakSingleKeyXor enc
