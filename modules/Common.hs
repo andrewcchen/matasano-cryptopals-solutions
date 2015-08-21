@@ -8,8 +8,11 @@ module Common
 , strToVec
 , chunksOf
 , randomBytes
+, appendBits
+, splitBitsAt
 ) where
 
+import Data.Bits
 import Data.Char
 import Data.Word
 import qualified Data.Vector.Generic as V
@@ -55,3 +58,9 @@ randomBytes count rng = go count rng []
         | c == 0 = (acc, g)
         | otherwise = let (byte, newG) = random g
                       in go (c - 1) newG (byte:acc)
+
+appendBits :: (Bits a, Integral a, FiniteBits b, Integral b) => a -> b -> a
+appendBits x bits = x `shiftL` finiteBitSize bits .|. fromIntegral bits
+
+splitBitsAt :: (Bits a, Integral a, Bits b, Integral b) => [Int] -> a -> [b]
+splitBitsAt boundaries bits = map (fromIntegral . (bits `shiftR`)) boundaries

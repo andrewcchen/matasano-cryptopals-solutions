@@ -7,7 +7,6 @@ import Common
 import Word6
 import Word24
 
-import Data.Bits
 import qualified Data.Map as M
 import qualified Data.Vector.Generic as V
 import Data.Word
@@ -25,31 +24,17 @@ charToBase64 = mapLookup cbMap
     where
     cbMap = M.fromList $ zip (['A'..'Z']++['a'..'z']++['0'..'9']++['+','/']) [0..63]
 
-infixl 8 <<<<
-(<<<<) :: (Bits a) => a -> Int -> a
-(<<<<) = shiftL
-
-infixl 8 >>>>
-(>>>>) :: (Bits a) => a -> Int -> a
-(>>>>) = shiftR
-
-appendBits :: (Bits a, Integral a, FiniteBits b, Integral b) => a -> b -> a
-appendBits x bits = (x <<<< (finiteBitSize bits)) .|. (fromIntegral bits)
-
-splitBits :: (Bits a, Integral a, Bits b, Integral b) => a -> [Int] -> [b]
-splitBits bits boundaries = map (fromIntegral . (bits >>>>)) boundaries
-
 sixBitsToEightBits :: [Word6] -> [Word8]
 sixBitsToEightBits ss
     | length ss /= 4 = error "Wrong number of six-bits"
-    | otherwise = splitBits combined [16, 8, 0]
+    | otherwise = splitBitsAt [16, 8, 0] combined
     where
     combined = foldl appendBits 0 ss :: Word24
 
 eightBitsToSixBits :: [Word8] -> [Word6]
 eightBitsToSixBits es
     | length es /= 3 = error "Wrong number of eight-bits"
-    | otherwise = splitBits combined [18, 12, 6, 0]
+    | otherwise = splitBitsAt [18, 12, 6, 0] combined
     where
     combined = foldl appendBits 0 es :: Word24
 
