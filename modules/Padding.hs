@@ -4,18 +4,16 @@ module Padding
 ) where
 
 import Common
+
 import qualified Data.Vector.Generic as V
+import Data.Word
 
-pkcs7Pad :: Int -> ByteVector -> ByteVector
-pkcs7Pad blockSize bytes = bytes V.++ (V.replicate padding $ fromIntegral padding)
+pkcs7Pad :: Word8 -> ByteVector -> ByteVector
+pkcs7Pad blockSize bytes
+    | blockSize == 0 = error "block size must be larger than 0"
+    | otherwise = bytes V.++ V.replicate (fromIntegral padding) padding
     where
-    padding = blockSize - V.length bytes `rem` blockSize
-
-takeFromTail :: Int -> ByteVector -> ByteVector
-takeFromTail len bytes = V.drop (V.length bytes - len) bytes
-
-dropFromTail :: Int -> ByteVector -> ByteVector
-dropFromTail len bytes = V.take (V.length bytes - len) bytes
+    padding = blockSize - fromIntegral (V.length bytes) `rem` blockSize
 
 pkcs7Unpad :: ByteVector -> Maybe ByteVector
 pkcs7Unpad bytes = if paddingCorrect then Just $ dropFromTail padCount bytes
@@ -25,3 +23,5 @@ pkcs7Unpad bytes = if paddingCorrect then Just $ dropFromTail padCount bytes
     expPadding = V.replicate padCount $ fromIntegral padCount
     actPadding = takeFromTail padCount bytes
     padCount = fromIntegral $ V.last bytes
+    takeFromTail len bytes = V.drop (V.length bytes - len) bytes
+    dropFromTail len bytes = V.take (V.length bytes - len) bytes
