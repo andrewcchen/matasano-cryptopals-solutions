@@ -2,6 +2,7 @@ module MT19937
 ( MT19937
 , twist
 , temper
+, untemper
 , fromState
 , seed
 , next
@@ -12,6 +13,7 @@ import Common
 import Control.Exception
 import Control.Monad
 import Data.Bits
+import Data.Function.Flippers
 import qualified Data.Vector.Generic as V
 import qualified Data.Vector.Generic.Mutable as VM
 import Data.Word
@@ -51,12 +53,19 @@ twist state = checkStateLength state $ V.create $ do
     return newState
 
 temper :: Word32 -> Word32
-temper x = z
+temper = transR l (complement 0) . transL t c . transL s b . transR u d
     where
-    y1 = x  `xor` ((x  `shiftR` u) .&. d)
-    y2 = y1 `xor` ((y1 `shiftL` s) .&. b)
-    y3 = y2 `xor` ((y2 `shiftL` t) .&. c)
-    z =  y3 `xor`  (y3 `shiftR` l)
+    transL shift mask x = x  `xor` ((x  `shiftL` shift) .&. mask)
+    transR shift mask x = x  `xor` ((x  `shiftR` shift) .&. mask)
+
+untemper :: Word32 -> Word32
+untemper = invertR u d . invertL s b . invertL t c . invertR l (complement 0)
+    where
+    invertL shift mask y = flip3 foldr (range (w - 1, 0)) 0 $ \i x ->
+        x .|. ((y `xor` ((x `shiftL` shift) .&. mask)) .&. bit i)
+    invertR shift mask y = flip3 foldr (range (0, w - 1)) 0 $ \i x ->
+        x .|. ((y `xor` ((x `shiftR` shift) .&. mask)) .&. bit i)
+    range (a, b) = if a <= b then [a..b] else [a,a-1..b]
 
 fromState :: Vector Word32 -> MT19937
 fromState state = checkStateLength state $ MT19937 0 state

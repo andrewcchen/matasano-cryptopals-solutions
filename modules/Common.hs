@@ -28,6 +28,7 @@ type ByteVector = Vector Word8
 
 instance (Arbitrary a, VS.Storable a) => Arbitrary (VS.Vector a) where
     arbitrary = fmap VS.fromList arbitrary
+    shrink = map VS.fromList . shrinkList shrink . VS.toList
 
 mapFst :: (a -> b) -> (a, c) -> (b, c)
 mapFst f (x,y) = (f x,y)
