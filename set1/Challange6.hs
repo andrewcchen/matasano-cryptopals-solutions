@@ -11,4 +11,4 @@ main = do
     enc <- fmap (base64Decode . filter (/= '\n')) $ hGetContents handle
     putStrLn $ vecToStr $ breakXor enc
     where
-    breakXor enc = xorBytes enc $ breakRepeatingKeyXor (guessKeySize) enc
+    breakXor enc = xorBytes enc $ breakRepeatingKeyXor (guessKeySize enc) enc

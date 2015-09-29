@@ -43,7 +43,7 @@ breakSingleKeyXor bytes = head $ sortOn scoreKey keyRange
 guessKeySize :: ByteVector -> Int
 guessKeySize bytes = head $ sortOn (flip blockHammingDistance bytes) sizeRange
     where
-    sizeRange = [2 .. min 40 $ V.length bytes]
+    sizeRange = [2 .. min 40 $ V.length bytes `quot` 2]
 
 breakRepeatingKeyXor :: Int -> ByteVector -> ByteVector
 breakRepeatingKeyXor keySize bytes = V.fromList $ keys
