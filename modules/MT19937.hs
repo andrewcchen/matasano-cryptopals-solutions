@@ -43,7 +43,7 @@ twist state = checkStateLength state $ V.create $ do
         let lowerMask = (1 `shiftL` r) - 1
             upperMask = complement lowerMask
             getX i = if i < n then return $ state V.! i
-                            else VM.read newState $ i `rem` n
+                              else VM.read newState $ i `rem` n
         xku <- fmap (.&. upperMask) $ getX k
         xkp1l <- fmap (.&. lowerMask) $ getX (k + 1)
         let x = xku .|. xkp1l
