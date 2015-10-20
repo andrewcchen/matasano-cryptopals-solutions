@@ -1,3 +1,5 @@
+{-# OPTIONS_GHC -fno-warn-tabs #-}
+
 module Hamming
 ( hammingDistance
 , blockHammingDistance
@@ -16,11 +18,11 @@ hammingDistance a b = V.sum $ V.map popCount $ V.zipWith xor a b
 
 chunksOfEven :: Int -> ByteVector -> [ByteVector]
 chunksOfEven size = go
-    where
-    go bytes = case V.splitAt size bytes of
-        (a,b) | V.null a  -> []
-              | V.null b  -> []
-              | otherwise -> a : go b
+	where
+	go bytes = case V.splitAt size bytes of
+	                (a,b) | V.null a  -> []
+	                      | V.null b  -> []
+	                      | otherwise -> a : go b
 
 intDiv :: (Integral a, Integral b, Fractional c) => a -> b -> c
 intDiv x y = fromIntegral x / fromIntegral y
@@ -30,6 +32,6 @@ mean l = sum l `intDiv` length l
 
 blockHammingDistance :: Int -> ByteVector -> Double
 blockHammingDistance blockSize bytes = mean dists / fromIntegral blockSize
-    where
-    dists = zipWith hammingDistance chunks $ tail chunks
-    chunks = chunksOfEven blockSize bytes
+	where
+	dists = zipWith hammingDistance chunks $ tail chunks
+	chunks = chunksOfEven blockSize bytes

@@ -1,3 +1,5 @@
+{-# OPTIONS_GHC -fno-warn-tabs #-}
+
 import AES
 import Common
 import Padding
@@ -11,32 +13,32 @@ data Mode = ECB | CBC deriving (Eq, Show, Enum)
 
 encryptionOracle :: Mode -> ByteVector -> StdGen -> (ByteVector, StdGen)
 encryptionOracle mode input rng = flip runState rng $ do
-    let randomByteVector      = fmap V.fromList . state . randomBytes
-        randomCountByteVector = state (randomR (5, 10)) >>= randomByteVector
-    before <- randomCountByteVector
-    after  <- randomCountByteVector
-    key    <- randomByteVector 16
-    iv     <- randomByteVector 16
-    let content = before V.++ input V.++ after
-        encrypt = case mode of ECB -> encryptECB key
-                               CBC -> encryptCBC key iv
-    return $ encrypt $ pkcs7Pad 16 content
+	let randomByteVector      = fmap V.fromList . state . randomBytes
+	    randomCountByteVector = state (randomR (5, 10)) >>= randomByteVector
+	before <- randomCountByteVector
+	after  <- randomCountByteVector
+	key    <- randomByteVector 16
+	iv     <- randomByteVector 16
+	let content = before V.++ input V.++ after
+	    encrypt = case mode of ECB -> encryptECB key
+	                           CBC -> encryptCBC key iv
+	return $ encrypt $ pkcs7Pad 16 content
 
 detectMode :: (ByteVector -> ByteVector) -> Mode
 detectMode blackbox = if topFreq >= 14 then ECB else CBC
-    where
-    outputBlocks = chunksOf 16 $ blackbox $ V.replicate (16 * 16) 0
-    topFreq = last $ sort $ map length $ group $ sort outputBlocks
+	where
+	outputBlocks = chunksOf 16 $ blackbox $ V.replicate (16 * 16) 0
+	topFreq = last $ sort $ map length $ group $ sort outputBlocks
 
 testDetectMode :: IO Bool
 testDetectMode = do
-    mode <- fmap toEnum $ getStdRandom (randomR (0, 1)) :: IO Mode
-    rng  <- newStdGen
-    let blackbox input = fst $ encryptionOracle mode input rng
-    return $ mode == detectMode blackbox
+	mode <- fmap toEnum $ getStdRandom (randomR (0, 1)) :: IO Mode
+	rng  <- newStdGen
+	let blackbox input = fst $ encryptionOracle mode input rng
+	return $ mode == detectMode blackbox
 
 main = do
-    putStrLn "=== Challange11 ==="
-    result <- fmap and $ sequence $ replicate 100 testDetectMode
-    if result then putStrLn "100 Tests Passed"
-              else putStrLn "Tests Failed"
+	putStrLn "=== Challange11 ==="
+	result <- fmap and $ sequence $ replicate 100 testDetectMode
+	if result then putStrLn "100 Tests Passed"
+	          else putStrLn "Tests Failed"

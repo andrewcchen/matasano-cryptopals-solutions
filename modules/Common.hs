@@ -1,3 +1,5 @@
+{-# OPTIONS_GHC -fno-warn-tabs #-}
+
 module Common
 ( Vector
 , ByteVector
@@ -27,8 +29,8 @@ type Vector = VS.Vector
 type ByteVector = Vector Word8
 
 instance (Arbitrary a, VS.Storable a) => Arbitrary (VS.Vector a) where
-    arbitrary = fmap VS.fromList arbitrary
-    shrink = map VS.fromList . shrinkList shrink . VS.toList
+	arbitrary = fmap VS.fromList arbitrary
+	shrink = map VS.fromList . shrinkList shrink . VS.toList
 
 mapFst :: (a -> b) -> (a, c) -> (b, c)
 mapFst f (x,y) = (f x,y)
@@ -47,18 +49,18 @@ strToVec = V.map (fromIntegral . ord) . V.fromList
 
 chunksOf :: Int -> ByteVector -> [[Word8]]
 chunksOf size = go
-    where
-    go bytes = case V.splitAt size bytes of
-        (a,b) | V.null a  -> []
-              | otherwise -> V.toList a : go b
+	where
+	go bytes = case V.splitAt size bytes of
+	                (a,b) | V.null a  -> []
+	                      | otherwise -> V.toList a : go b
 
 randomBytes :: Int -> StdGen -> ([Word8], StdGen)
 randomBytes count rng = go count rng []
-    where
-    go c g acc
-        | c == 0 = (acc, g)
-        | otherwise = let (byte, newG) = random g
-                      in go (c - 1) newG (byte:acc)
+	where
+	go c g acc
+		| c == 0 = (acc, g)
+		| otherwise = let (byte, newG) = random g
+		              in go (c - 1) newG (byte:acc)
 
 appendBits :: (Bits a, Integral a, FiniteBits b, Integral b) => a -> b -> a
 appendBits x bits = x `shiftL` finiteBitSize bits .|. fromIntegral bits
