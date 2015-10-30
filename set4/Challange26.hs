@@ -28,4 +28,4 @@ main = do
 	    diff = (xorBytes `on` strToVec) ";comment2=%2" ";admin=true;"
 	    toXor = V.replicate 32 0 V.++ diff V.++ V.replicate 30 0
 	    modified = xorBytes out toXor
-	if check key nonce modified then putStrLn "Success!" else putStrLn "Fail!"
+	if check key nonce modified then putStrLn "Success!" else putStrLn "Failed!"
